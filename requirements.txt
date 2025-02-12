@@ -1,0 +1,11 @@
+python-dotenv
+pandas
+numpy
+pymango
+seaborn
+matplotlib
+scikit-learn
+flask
+certifi
+
+-e .
