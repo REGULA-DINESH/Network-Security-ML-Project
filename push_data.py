@@ -9,14 +9,12 @@ import pymongo
 from networksecurity.logging.logger import logging
 from networksecurity.exception.exception import NetworkSecurityException
 
-load_dotenv()
-MONGO_DB_URL = os.getenv("MONGO_DB_URL")
-trusted_certificate_authorities = certifi.where()
-
 class NetworkDataExtract:
     def __init__(self):
         try:
-            pass
+            load_dotenv()
+            self.MONGO_DB_URL = os.getenv("MONGO_DB_URL")
+            self.trusted_certificate_authorities = certifi.where()
         except Exception as e:
             exception = NetworkSecurityException(e, sys)
             print(exception)
@@ -36,10 +34,13 @@ class NetworkDataExtract:
             self.database = database
             self.collection = collection
             self.records = records
-            self.mongo_client = pymongo.MongoClient(MONGO_DB_URL)
+            self.mongo_client = pymongo.MongoClient(self.MONGO_DB_URL, tlsCAFile = self.trusted_certificate_authorities)
             self.database = self.mongo_client[self.database]
             self.collection = self.database[self.collection]
-            self.collection.insert_many(self.records)
+            if records:
+                self.collection.insert_many(self.records)
+            else:
+                raise NetworkSecurityException("No records to insert", sys)
             return len(self.records)
         except Exception as e:
             exception = NetworkSecurityException(e, sys)
